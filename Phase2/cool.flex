@@ -182,6 +182,10 @@ DARROW          =>
     current_string += '\n';
 }
 
+<STRING>{ESCAPE}{QUOTE} {
+    current_string += '"';
+}
+
 <STRING>{NEWLINE} {
     BEGIN INITIAL;
     curr_lineno++;
@@ -196,7 +200,10 @@ DARROW          =>
 <STRING>{ESCAPE}. {
     char ch;
     switch((ch = yytext[1])) {
-        case 'v':
+    case 'b':
+	    current_string += '\b';
+	    break;
+    case 'v':
 	    current_string += '\v';
 	    break;
 	case 't':
@@ -208,15 +215,12 @@ DARROW          =>
 	case 'f':
 	    current_string += '\f';
 	    break;
-	case 'r':
-	    current_string += '\r';
-	    break;
 	case '\0':
 	    null_presented = 1;
 	    break;
 	default:
 	    current_string += ch;
-            break;
+        break;
     }
 }
 
