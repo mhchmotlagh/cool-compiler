@@ -1,3 +1,13 @@
+/*
+ *  The scanner definition for COOL.
+ */
+
+/*
+ *  Stuff enclosed in %{ %} in the first section is copied verbatim to the
+ *  output, so headers and global definitions are placed here to be visible
+ * to the code in the file.  Dont remove anything that was here initially
+ */
+
 %option noyywrap 
 %{
     #include <cool-parse.h>
@@ -31,18 +41,18 @@
 
     extern YYSTYPE cool_yylval;
 
-    static int comments_stack;
-    static int null_char_present;
+    // my definitions
+    static int comments_depth, null_presented;
     static std::string current_string;
 
 %}
 
 DIGIT           [0-9]
 INTEGER         {DIGIT}+
-ESCAPE		\\
+ESCAPE		    \\
 NEWLINE         \n
 NULL_CHAR       \0
-ONE_CHAR	[:+\-*/=)(}{~.,;<@]
+ONE_CHAR	    [:+\-*/=)(}{~.,;<@]
 TRUE            t(?i:rue)
 FALSE           f(?i:alse)
 LPAREN          \(
@@ -128,14 +138,14 @@ DARROW          =>
 }
 
 {LPAREN}{STAR} {
-    comments_stack++;
+    comments_depth++;
     BEGIN COMMENTS;
 }
 
 {QUOTE}	{
     BEGIN STRING;
     current_string = "";
-    null_char_present = 0;
+    null_presented = 0;
 }
 
 . {
@@ -160,7 +170,7 @@ DARROW          =>
         cool_yylval.error_msg = "String constant too long";
 	    return ERROR;
     }
-    if (null_char_present) {
+    if (null_presented) {
        cool_yylval.error_msg = "String contains null character";
        return ERROR;
     }
@@ -180,7 +190,7 @@ DARROW          =>
 }
 
 <STRING>{NULL_CHAR} {
-    null_char_present = 1;
+    null_presented = 1;
 }
 
 <STRING>{ESCAPE}. {
@@ -202,7 +212,7 @@ DARROW          =>
 	    current_string += '\r';
 	    break;
 	case '\0':
-	    null_char_present = 1;
+	    null_presented = 1;
 	    break;
 	default:
 	    current_string += ch;
@@ -221,12 +231,12 @@ DARROW          =>
 }
 
 <COMMENTS>{LPAREN}{STAR} {
-    comments_stack++;
+    comments_depth++;
 }
 
 <COMMENTS>{STAR}{RPAREN} {
-    comments_stack--;
-    if (comments_stack == 0) {
+    comments_depth--;
+    if (comments_depth == 0) {
        BEGIN INITIAL;
     }
 }
