@@ -168,17 +168,17 @@ Save the root of the abstract syntax tree in a global variable.
 program : classes { @$ = @1; ast_root = program($1); };
 
 classes : class { $$ = single_Classes($1); parse_results = $$;}
-           | classes class { $$ = append_Classes($1, single_Classes($2)); parse_results = $$; };
+        | classes class { $$ = append_Classes($1, single_Classes($2)); parse_results = $$; };
 
 class : CLASS TYPEID '{' features '}' ';' { $$ = class_($2, idtable.add_string("Object"), $4, stringtable.add_string(curr_filename)); }
       | CLASS TYPEID INHERITS TYPEID '{' features '}' ';' { $$ = class_($2, $4, $6, stringtable.add_string(curr_filename)); }
       | error;
 
 features : nonempty_features { $$ = $1; }
-             | { $$ = nil_Features(); };
+         | { $$ = nil_Features(); };
 
 nonempty_features : feature ';' nonempty_features { $$ = append_Features(single_Features($1), $3); }
-                      | feature ';' { $$ = single_Features($1); };
+                  | feature ';' { $$ = single_Features($1); };
 
 feature : OBJECTID '(' formals ')' ':' TYPEID '{' nonempty_expr '}' { $$ = method($1, $3, $6, $8); }
         | OBJECTID ':' TYPEID { $$ = attr($1, $3, no_expr()); }
@@ -186,23 +186,23 @@ feature : OBJECTID '(' formals ')' ':' TYPEID '{' nonempty_expr '}' { $$ = metho
         | error;
 
 formals : nonempty_formals { $$ = $1; }
-            | { $$ = nil_Formals(); };
+        | { $$ = nil_Formals(); };
 
 nonempty_formals : formal ',' nonempty_formals { $$ = append_Formals(single_Formals($1), $3); }
-                     | formal { $$ = single_Formals($1); };
+                 | formal { $$ = single_Formals($1); };
 
 formal : OBJECTID ':' TYPEID { $$ = formal($1, $3); };
 
 expressions : expressions ',' nonempty_expr { $$ = append_Expressions($1, single_Expressions($3)); }
-                | nonempty_expr { $$ = single_Expressions($1); }
-                | { $$ = nil_Expressions(); };
+            | nonempty_expr { $$ = single_Expressions($1); }
+            | { $$ = nil_Expressions(); };
 
 nonempty_block : nonempty_expr ';' { $$ = single_Expressions($1); }
                | nonempty_expr ';' nonempty_block { $$ = append_Expressions(single_Expressions($1), $3); }
                | error;
 
 cases : cases branch ';' { $$ = append_Cases($1, single_Cases($2)); }
-          | branch ';' { $$ = single_Cases($1); };
+      | branch ';' { $$ = single_Cases($1); };
 
 branch : OBJECTID ':' TYPEID DARROW expression { $$ = branch($1, $3, $5); };
 
@@ -239,8 +239,7 @@ nonempty_expr : OBJECTID ASSIGN nonempty_expr { $$ = assign($1, $3); }
               | INT_CONST { $$ = int_const($1); }
               | STR_CONST { $$ = string_const($1); }
               | BOOL_CONST { $$ = bool_const($1); }
-              | error { }
-              ;
+              | error { };
 
 
 while_exp : WHILE nonempty_expr LOOP expression POOL { $$ = loop($2, $4); }
