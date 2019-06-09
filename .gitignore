@@ -1,17 +1,17 @@
 # Ignore everything
-*
+**
 
 # But not these files...
 !.gitignore
 !README.md
 
 # Phase2
-!*/cool.flex
+!**/cool.flex
 
 # Phase3
-!*/cool.y
+!**/cool.y
 
 # Phase4
-!*/cool-tree.h
-!*/semant.cc
-!*/semant.h
+!**/cool-tree.h
+!**/semant.cc
+!**/semant.h
