@@ -14,7 +14,7 @@
 #define FALSE 0
 
 class ClassTable;
-typedef ClassTable *ClassTableP;
+typedef ClassTable* ClassTableP;
 
 // This is a structure that may be used to contain the semantic
 // information such as the inheritance graph.  You may use it or not as
@@ -23,21 +23,21 @@ typedef ClassTable *ClassTableP;
 
 class ClassTable {
 private:
-	int semant_errors;
-	void install_basic_classes();
-	ostream& error_stream;
+    int semant_errors;
+    void install_basic_classes();
+    ostream& error_stream;
 
 public:
-	std::map<Symbol, Class_> m_classes;
-	ClassTable(Classes);
-	int errors() { return semant_errors; }
-	ostream& semant_error();
-	ostream& semant_error(Class_ c);
-	ostream& semant_error(Symbol filename, tree_node *t);
+    std::map<Symbol, Class_> m_classes;
+    ClassTable(Classes);
+    int errors() { return semant_errors; }
+    ostream& semant_error();
+    ostream& semant_error(Class_ c);
+    ostream& semant_error(Symbol filename, tree_node* t);
 
-	bool IsParent(Symbol ancestor, Symbol child);
-	std::list<Symbol> GetInheritancePath(Symbol type);
-	Symbol FindLCA(Symbol type1, Symbol type2);
+    bool IsParent(Symbol ancestor, Symbol child);
+    std::list<Symbol> GetInheritancePath(Symbol type);
+    Symbol FindLCA(Symbol type1, Symbol type2);
 };
 
 #endif
