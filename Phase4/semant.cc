@@ -182,22 +182,8 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0), error_stream(cerr)
     log << std::endl;
 }
 
-// ClassTable::CheckInheritance
-// ============================
 // check whether ancestor is a (direct or indirect) ancestor of child
-//
-// input:
-//     Symbol ancestor, Symbol child
-//
-// output:
-//     bool
-//
 // note on SELF_TYPE:
-//     When some object o in class C is of SELF_TYPE,
-//     it means the real(dynamic) type of o might be C,
-//     or any subclass of C, depending on the dynamic type of the containing object.
-//     Then, how do we check the inheritance in case of SELF_TYPE?
-//
 //     1. ancestor = child = SELF_TYPE
 //        In this case, we know that the 2 objects have the same dynamic type.
 //
@@ -217,10 +203,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0), error_stream(cerr)
 //        Even if A <= C, ancestor's dynamic type could be a subclass of C,
 //        which might not be an ancestor of A.
 //
-//     To sum up, the type checker is more strict than the real world: it might reject
-//     some valid programs, but it will not tolerate any invalid program.
-//
-bool ClassTable::CheckInheritance(Symbol ancestor, Symbol child)
+bool ClassTable::IsParent(Symbol ancestor, Symbol child)
 {
     if (ancestor == SELF_TYPE)
     {
@@ -242,14 +225,7 @@ bool ClassTable::CheckInheritance(Symbol ancestor, Symbol child)
     return false;
 }
 
-// ClassTable::GetInheritancePath
-// ==============================
 // get a path from type to Object, inclusive
-//
-// input: Symbol type
-//
-// output: std::list<Symbol>
-//
 std::list<Symbol> ClassTable::GetInheritancePath(Symbol type)
 {
     if (type == SELF_TYPE)
@@ -268,20 +244,8 @@ std::list<Symbol> ClassTable::GetInheritancePath(Symbol type)
     return path;
 }
 
-// ClassTable::FindCommonAncestor
-// ==============================
-// find the first common ancestor of two types
-//
-// input:
-//     Symbol type1, Symbol type2
-//
-// output:
-//     Symbol
-//
-// note that this function can always return something,
-// because any two types have Object as their common ancestor
-//
-Symbol ClassTable::FindCommonAncestor(Symbol type1, Symbol type2)
+// find the lowest common ancestor of two types
+Symbol ClassTable::FindLCA(Symbol type1, Symbol type2)
 {
 
     std::list<Symbol> path1 = GetInheritancePath(type1);
@@ -530,7 +494,7 @@ void method_class::CheckFeatureType()
     }
 
     Symbol expr_type = expr->CheckExprType();
-    if (classtable->CheckInheritance(return_type, expr_type) == false)
+    if (classtable->IsParent(return_type, expr_type) == false)
     {
         classtable->semant_error(curr_class) << "Error! return type is not ancestor of expr type. " << std::endl;
     }
@@ -557,7 +521,7 @@ Symbol assign_class::CheckExprType()
         type = Object;
         return type;
     }
-    if (classtable->CheckInheritance(*lvalue_type, rvalue_type) == false)
+    if (classtable->IsParent(*lvalue_type, rvalue_type) == false)
     {
         classtable->semant_error(curr_class) << "Error! lvalue is not an ancestor of rvalue. " << std::endl;
         type = Object;
@@ -573,7 +537,7 @@ Symbol static_dispatch_class::CheckExprType()
 
     Symbol expr_class = expr->CheckExprType();
 
-    if (classtable->CheckInheritance(type_name, expr_class) == false)
+    if (classtable->IsParent(type_name, expr_class) == false)
     {
         error = true;
         classtable->semant_error(curr_class) << "Error! Static dispatch class is not an ancestor." << std::endl;
@@ -607,7 +571,7 @@ Symbol static_dispatch_class::CheckExprType()
         if (method != NULL)
         {
             Symbol formal_type = method->GetFormals()->nth(i)->GetType();
-            if (classtable->CheckInheritance(formal_type, actual_type) == false)
+            if (classtable->IsParent(formal_type, actual_type) == false)
             {
                 classtable->semant_error(curr_class) << "Error! Actual type " << actual_type << " doesn't suit formal type " << formal_type << std::endl;
                 error = true;
@@ -672,7 +636,7 @@ Symbol dispatch_class::CheckExprType()
         if (method != NULL)
         {
             Symbol formal_type = method->GetFormals()->nth(i)->GetType();
-            if (classtable->CheckInheritance(formal_type, actual_type) == false)
+            if (classtable->IsParent(formal_type, actual_type) == false)
             {
                 classtable->semant_error(curr_class) << "Error! Actual type " << actual_type << " doesn't suit formal type " << formal_type << std::endl;
                 error = true;
@@ -719,7 +683,7 @@ Symbol cond_class::CheckExprType()
     }
     else
     {
-        type = classtable->FindCommonAncestor(then_type, else_type);
+        type = classtable->FindLCA(then_type, else_type);
     }
     return type;
 }
@@ -771,7 +735,7 @@ Symbol typcase_class::CheckExprType()
     type = branch_types[0];
     for (int i = 1; i < branch_types.size(); ++i)
     {
-        type = classtable->FindCommonAncestor(type, branch_types[i]);
+        type = classtable->FindLCA(type, branch_types[i]);
     }
     return type;
 }
@@ -825,7 +789,7 @@ Symbol let_class::CheckExprType()
     // if there is an initialization expression
     if (init_type != No_type)
     {
-        if (classtable->CheckInheritance(type_decl, init_type) == false)
+        if (classtable->IsParent(type_decl, init_type) == false)
         {
             classtable->semant_error(curr_class) << "Error! init value is not child." << std::endl;
         }

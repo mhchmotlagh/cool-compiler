@@ -35,10 +35,9 @@ public:
 	ostream& semant_error(Class_ c);
 	ostream& semant_error(Symbol filename, tree_node *t);
 
-	// new methods.
-	bool CheckInheritance(Symbol ancestor, Symbol child);
-	Symbol FindCommonAncestor(Symbol type1, Symbol type2);
+	bool IsParent(Symbol ancestor, Symbol child);
 	std::list<Symbol> GetInheritancePath(Symbol type);
+	Symbol FindLCA(Symbol type1, Symbol type2);
 };
 
 #endif
