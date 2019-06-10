@@ -21,20 +21,19 @@ typedef ClassTable *ClassTableP;
 // you like: it is only here to provide a container for the supplied
 // methods.
 
-class ClassTable
-{
+class ClassTable {
 private:
 	int semant_errors;
 	void install_basic_classes();
-	ostream &error_stream;
+	ostream& error_stream;
 
 public:
 	std::map<Symbol, Class_> m_classes;
 	ClassTable(Classes);
 	int errors() { return semant_errors; }
-	ostream &semant_error();
-	ostream &semant_error(Class_ c);
-	ostream &semant_error(Symbol filename, tree_node *t);
+	ostream& semant_error();
+	ostream& semant_error(Class_ c);
+	ostream& semant_error(Symbol filename, tree_node *t);
 
 	// new methods.
 	bool CheckInheritance(Symbol ancestor, Symbol child);
