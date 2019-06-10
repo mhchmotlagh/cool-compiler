@@ -1067,6 +1067,10 @@ void program_class::semant()
     /* ClassTable constructor may do some semantic analysis */
     classtable = new ClassTable(classes);
 
+    if (classtable->errors()){
+        cerr << "Compilation halted due to static semantic errors." << endl;
+        exit(1);
+    }
 
     // Pass through every method in every class, construct the methodtables.
     log << "Now constructing the methodtables:" << std::endl;
