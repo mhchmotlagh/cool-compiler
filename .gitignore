@@ -16,3 +16,10 @@
 !**/semant.cc
 !**/semant.h
 !**/grader.pl
+
+# Phase5
+!**/cool-tree.h
+!**/cool-tree.handcode.h
+!**/cgen.h
+!**/cgen.cc
+
