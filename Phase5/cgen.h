@@ -1,16 +1,13 @@
 #include <assert.h>
 #include <stdio.h>
+#include <list>
 #include <stack>
 #include <vector>
-#include <list>
-#include "emit.h"
 #include "cool-tree.h"
+#include "emit.h"
 #include "symtab.h"
 
-enum Basicness {
-    Basic,
-    NotBasic
-};
+enum Basicness { Basic, NotBasic };
 #define TRUE 1
 #define FALSE 0
 
@@ -22,18 +19,18 @@ typedef CgenClassTable *CgenClassTableP;
 class CgenNode;
 typedef CgenNode *CgenNodeP;
 
-class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
-private:
+class CgenClassTable : public SymbolTable<Symbol, CgenNode> {
+   private:
     List<CgenNode> *nds;
-    ostream& str;
+    ostream &str;
     int stringclasstag;
     int intclasstag;
     int boolclasstag;
-    std::vector<CgenNode*> m_class_nodes;
+    std::vector<CgenNode *> m_class_nodes;
     std::map<Symbol, int> m_class_tags;
 
-// The following methods emit code for
-// constants and global declarations.
+    // The following methods emit code for
+    // constants and global declarations.
 
     void code_global_data();
     void code_global_text();
@@ -46,54 +43,50 @@ private:
     void code_protObjs();
     void code_class_inits();
     void code_class_methods();
-// The following creates an inheritance graph from
-// a list of classes.  The graph is implemented as
-// a tree of `CgenNode', and class names are placed
-// in the base class symbol table.
+    // The following creates an inheritance graph from
+    // a list of classes.  The graph is implemented as
+    // a tree of `CgenNode', and class names are placed
+    // in the base class symbol table.
 
     void install_basic_classes();
     void install_class(CgenNodeP nd);
     void install_classes(Classes cs);
     void build_inheritance_tree();
     void set_relations(CgenNodeP nd);
-public:
-    CgenClassTable(Classes, ostream& str);
+
+   public:
+    CgenClassTable(Classes, ostream &str);
     void Execute() {
         code();
         exitscope();
     }
     void code();
     CgenNodeP root();
-    std::vector<CgenNode*> GetClassNodes();
+    std::vector<CgenNode *> GetClassNodes();
     std::map<Symbol, int> GetClassTags();
-    CgenNode* GetClassNode(Symbol class_name) {
+    CgenNode *GetClassNode(Symbol class_name) {
         GetClassNodes();
         return m_class_nodes[m_class_tags[class_name]];
     }
 };
 
-
 class CgenNode : public class__class {
-private:
-    CgenNodeP parentnd;                        // Parent of class
-    List<CgenNode> *children;                  // Children of class
-    Basicness basic_status;                    // `Basic' if class is basic
-    // `NotBasic' otherwise
+   private:
+    CgenNodeP parentnd;        // Parent of class
+    List<CgenNode> *children;  // Children of class
+    Basicness basic_status;    // `Basic' if class is basic
+                               // `NotBasic' otherwise
 
-public:
-    CgenNode(Class_ c,
-             Basicness bstatus,
-             CgenClassTableP class_table);
+   public:
+    CgenNode(Class_ c, Basicness bstatus, CgenClassTableP class_table);
 
     void add_child(CgenNodeP child);
 
-    List<CgenNode>* get_children() {
-        return children;
-    }
+    List<CgenNode> *get_children() { return children; }
 
-    std::vector<CgenNode*> GetChildren() {
-        std::vector<CgenNode*> ret;
-        List<CgenNode>* _children = get_children();
+    std::vector<CgenNode *> GetChildren() {
+        std::vector<CgenNode *> ret;
+        List<CgenNode> *_children = get_children();
         while (_children != nullptr) {
             ret.push_back(_children->hd());
             _children = _children->tl();
@@ -103,23 +96,19 @@ public:
 
     void set_parentnd(CgenNodeP p);
 
-    CgenNodeP get_parentnd() {
-        return parentnd;
-    }
+    CgenNodeP get_parentnd() { return parentnd; }
 
-    int basic() {
-        return (basic_status == Basic);
-    }
+    int basic() { return (basic_status == Basic); }
 
-    void code_protObj(ostream& s);
-    void code_init(ostream& s);
-    void code_methods(ostream& s);
+    void code_protObj(ostream &s);
+    void code_init(ostream &s);
+    void code_methods(ostream &s);
 
-    std::vector<method_class*> GetMethods();
-    std::vector<method_class*> m_methods;
+    std::vector<method_class *> GetMethods();
+    std::vector<method_class *> m_methods;
 
-    std::vector<method_class*> GetFullMethods();
-    std::vector<method_class*> m_full_methods;
+    std::vector<method_class *> GetFullMethods();
+    std::vector<method_class *> m_full_methods;
 
     std::map<Symbol, Symbol> GetDispatchClassTab();
     std::map<Symbol, Symbol> m_dispatch_class_tab;
@@ -127,39 +116,36 @@ public:
     std::map<Symbol, int> GetDispatchIdxTab();
     std::map<Symbol, int> m_dispatch_idx_tab;
 
-    std::vector<attr_class*> GetAttribs();
-    std::vector<attr_class*> m_attribs;
+    std::vector<attr_class *> GetAttribs();
+    std::vector<attr_class *> m_attribs;
 
-    std::vector<attr_class*> GetFullAttribs();
-    std::vector<attr_class*> m_full_attribs;
+    std::vector<attr_class *> GetFullAttribs();
+    std::vector<attr_class *> m_full_attribs;
 
     std::map<Symbol, int> GetAttribIdxTab();
     std::map<Symbol, int> m_attrib_idx_tab;
 
-    std::vector<CgenNode*> GetInheritance();
-    std::vector<CgenNode*> inheritance;
+    std::vector<CgenNode *> GetInheritance();
+    std::vector<CgenNode *> inheritance;
 
     int class_tag;
 };
 
-class BoolConst
-{
-private:
+class BoolConst {
+   private:
     int val;
-public:
+
+   public:
     BoolConst(int);
-    void code_def(ostream&, int boolclasstag);
-    void code_ref(ostream&) const;
+    void code_def(ostream &, int boolclasstag);
+    void code_ref(ostream &) const;
 };
 
-
 class Environment {
-public:
+   public:
     Environment() : m_class_node(nullptr) {}
 
-    void EnterScope() {
-        m_scope_lengths.push_back(0);
-    }
+    void EnterScope() { m_scope_lengths.push_back(0); }
 
     void ExitScope() {
         for (int i = 0; i < m_scope_lengths[m_scope_lengths.size() - 1]; ++i) {
@@ -211,6 +197,5 @@ public:
     std::vector<int> m_scope_lengths;
     std::vector<Symbol> m_var_idx_tab;
     std::vector<Symbol> m_param_idx_tab;
-    CgenNode* m_class_node;
-
+    CgenNode *m_class_node;
 };
